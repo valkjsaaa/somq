@@ -3,7 +3,7 @@ name = "somq"
 version = "0.1"
 authors = [{name = "Jackie Yang", email = "jackie@jackieyang.me"}]
 description = "Simple Object-based Message Queue"
-license = { text = "Apache-2.0" }
+license = { file="LICENSE" }
 requires-python = ">=3.7"
 classifiers = [
     "Development Status :: 3 - Alpha",
