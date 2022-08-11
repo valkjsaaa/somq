@@ -4,6 +4,8 @@ version = "0.1"
 authors = [{name = "Jackie Yang", email = "jackie@jackieyang.me"}]
 description = "Simple Object-based Message Queue"
 license = { file="LICENSE" }
+long_description = { file="README.md" }
+long_description_content_type = "text/markdown"
 requires-python = ">=3.7"
 classifiers = [
     "Development Status :: 3 - Alpha",
