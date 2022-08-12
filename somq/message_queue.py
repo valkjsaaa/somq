@@ -1,7 +1,7 @@
 import queue
 import threading
 from enum import Enum
-from typing import Generic, TypeVar, Callable, Union, List
+from typing import Generic, TypeVar, Callable, Union, List, Tuple, Set
 
 Topic = TypeVar('Topic', bound=Enum)
 Object = TypeVar('Object')
@@ -33,7 +33,7 @@ class ListeningThread(threading.Thread):
 class MessageQueue(Generic[Topic, Object]):
 
     def __init__(self):
-        self.queues: {Topic: [queue.Queue[Object]]} = {}
+        self.queues: [Tuple[Set[Topic], queue.Queue[Object]]] = []
 
     def subscribe(self, topics: Union[List[Topic], Topic]) -> queue.Queue[Object]:
         """
@@ -42,15 +42,10 @@ class MessageQueue(Generic[Topic, Object]):
         :return: The queue to receive messages on.
         """
         q = queue.Queue()
-        if isinstance(topics, list):
-            for topic in topics:
-                if topic not in self.queues:
-                    self.queues[topic] = []
-                self.queues[topic].append(q)
-        else:
-            if topics not in self.queues:
-                self.queues[topics] = []
-            self.queues[topics].append(q)
+        if not isinstance(topics, list):
+            topics = [topics]
+        topics = set(topics)
+        self.queues.append((topics, q))
         return q
 
     def publish(self, topic: Union[List[Topic], Topic], message: Object):
@@ -59,15 +54,12 @@ class MessageQueue(Generic[Topic, Object]):
         :param topic: The list of topics or topic to publish to.
         :param message: The message to publish.
         """
-        if isinstance(topic, list):
-            for t in topic:
-                if t in self.queues:
-                    for q in self.queues[t]:
-                        q.put(message)
-        else:
-            if topic in self.queues:
-                for q in self.queues[topic]:
-                    q.put(message)
+        if not isinstance(topic, list):
+            topic = [topic]
+        topic = set(topic)
+        for t, q in self.queues:
+            if t & topic:
+                q.put(message)
 
     def unsubscribe(self, q: queue.Queue[Object]):
         """
@@ -75,12 +67,11 @@ class MessageQueue(Generic[Topic, Object]):
         :param q: The queue to unsubscribe from.
         :return:
         """
-        for topic in self.queues:
-            if q in self.queues[topic]:
-                self.queues[topic].remove(q)
-                if not self.queues[topic]:
-                    del self.queues[topic]
-                break
+        for t, q2 in self.queues:
+            if q2 == q:
+                self.queues.remove((t, q))
+                return
+        raise ValueError('Queue not found')
 
     def subscribe_function(self, topics: Union[List[Topic], Topic], f: Callable[[Object], None]) -> ListeningThread:
         """

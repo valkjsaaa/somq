@@ -1,3 +1,4 @@
+import time
 from enum import IntEnum
 from unittest import TestCase
 
@@ -25,6 +26,12 @@ class TestMessageQueue(TestCase):
         mq.publish(Topic.all(), 'all')
         # test if a message is received by all
         self.assertEqual(q_all.get(block=False), 'all')
+        error = None
+        try:
+            q_all.get(block=False)
+        except Exception as e:
+            error = e
+        self.assertIsNotNone(error)
         # test if a message is received by a
         self.assertEqual(q_a.get(block=False), 'all')
         # test if a message is received by b
@@ -51,6 +58,7 @@ class TestMessageQueue(TestCase):
         # publish to a
         mq.publish(Topic.A, 'a')
         # test if a message is received by f
+        time.sleep(0.1)
         self.assertEqual(test_message, 'a')
         thread.stop()
         mq.publish(Topic.A, 'b')
