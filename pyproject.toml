@@ -1,6 +1,6 @@
 [project]
 name = "somq"
-version = "0.1.2"
+version = "0.1.3"
 authors = [{name = "Jackie Yang", email = "jackie@jackieyang.me"}]
 description = "Simple Object-based Message Queue"
 license = { file="LICENSE" }
