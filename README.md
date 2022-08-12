@@ -11,8 +11,10 @@ pip install somq
 Usage:
 
 ```python
+import time
 from enum import IntEnum
 from somq import MessageQueue
+
 
 class Topic(IntEnum):
     A = 1
@@ -22,6 +24,7 @@ class Topic(IntEnum):
     @staticmethod
     def all() -> ['Topic']:
         return [e.value for e in Topic]
+
 
 mq = MessageQueue()
 q_all = mq.subscribe([Topic.A, Topic.B, Topic.C])
@@ -42,6 +45,7 @@ thread = mq.subscribe_function(Topic.A, lambda x: print(x))
 # publish to a
 mq.publish(Topic.A, 'a')
 # print 'a'
+time.sleep(0.1)
 # stop the thread
 thread.stop()
 ```
