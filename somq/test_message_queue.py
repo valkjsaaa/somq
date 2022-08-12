@@ -16,7 +16,7 @@ class TestMessageQueue(TestCase):
         # noinspection PyTypeChecker
         mq.publish('a_test', 'a')
         # test if a message is received by all
-        self.assertEqual(q_all.get(block=False), 'a')
+        self.assertEqual(q_all.get(block=False), ('a_test', 'a'))
         error = None
         try:
             q_all.get(block=False)
@@ -24,7 +24,7 @@ class TestMessageQueue(TestCase):
             error = e
         self.assertIsNotNone(error)
         # test if a message is received by a
-        self.assertEqual(q_a.get(block=False), 'a')
+        self.assertEqual(q_a.get(block=False), ('a_test', 'a'))
         error = None
         try:
             q_a.get(block=False)
@@ -39,7 +39,7 @@ class TestMessageQueue(TestCase):
             error = e
         self.assertIsNotNone(error)
         # test if a message is received by ab
-        self.assertEqual(q_ab.get(block=False), 'a')
+        self.assertEqual(q_ab.get(block=False), ('a_test', 'a'))
         error = None
         try:
             q_ab.get(block=False)
@@ -58,7 +58,7 @@ class TestMessageQueue(TestCase):
         mq.publish('a', 'a')
         # test if a message is received by f
         time.sleep(0.1)
-        self.assertEqual(test_message, 'a')
+        self.assertEqual(test_message, ('a', 'a'))
         thread.stop()
         mq.publish('b', 'b')
-        self.assertEqual(test_message, 'a')
+        self.assertEqual(test_message, ('a', 'a'))

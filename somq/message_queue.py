@@ -8,7 +8,12 @@ Object = TypeVar('Object')
 
 class ListeningThread(threading.Thread):
     # noinspection PyShadowingNames
-    def __init__(self, message_queue: 'MessageQueue', queue: queue.Queue, function: Callable[[Object], None]):
+    def __init__(
+            self,
+            message_queue: 'MessageQueue',
+            queue: queue.Queue,
+            function: Callable[[Tuple[str, Object]], None]
+    ):
         super().__init__()
         self.message_queue = message_queue
         self.queue = queue
@@ -33,7 +38,7 @@ class ListeningThread(threading.Thread):
 class MessageQueue(Generic[Object]):
 
     def __init__(self):
-        self.queues: [Tuple[Set[str], queue.Queue[Object]]] = []
+        self.queues: [Tuple[Set[str], queue.Queue[Tuple[str, Object]]]] = []
 
     def subscribe(self, topics: Union[List[str], str]) -> queue.Queue[Object]:
         """
@@ -60,7 +65,7 @@ class MessageQueue(Generic[Object]):
         for t, q in self.queues:
             for t1, t2 in itertools.product(topic, t):
                 if t1.startswith(t2):
-                    q.put(message)
+                    q.put((t1, message))
                     break
 
     def unsubscribe(self, q: queue.Queue[Object]):
