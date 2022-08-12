@@ -12,7 +12,7 @@ class ListeningThread(threading.Thread):
             self,
             message_queue: 'MessageQueue',
             queue: queue.Queue,
-            function: Callable[[Tuple[str, Object]], None]
+            function: Callable[[str, Object], None]
     ):
         super().__init__()
         self.message_queue = message_queue
@@ -23,9 +23,10 @@ class ListeningThread(threading.Thread):
 
     def run(self):
         while self.running:
-            message = self.queue.get()
+            result = self.queue.get()
             if self.running:
-                self.function(message)
+                topic, message = result
+                self.function(topic, message)
                 self.queue.task_done()
 
     def stop(self):
@@ -80,7 +81,7 @@ class MessageQueue(Generic[Object]):
                 return
         raise ValueError('Queue not found')
 
-    def subscribe_function(self, topics: Union[List[str], str], f: Callable[[Object], None]) -> ListeningThread:
+    def subscribe_function(self, topics: Union[List[str], str], f: Callable[[str, Object], None]) -> ListeningThread:
         """
         Subscribe to a topic and call a function when a message is received.
         :param topics: The list of topics or topic to subscribe to.

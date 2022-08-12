@@ -47,18 +47,21 @@ class TestMessageQueue(TestCase):
             error = e
         self.assertIsNotNone(error)
         # test subscribe function
+        test_topic = None
         test_message = None
 
-        def f(message):
-            nonlocal test_message
+        def f(topic, message):
+            nonlocal test_message, test_topic
             test_message = message
+            test_topic = topic
 
         thread = mq.subscribe_function('a', f)
         # publish to a
         mq.publish('a', 'a')
         # test if a message is received by f
         time.sleep(0.1)
-        self.assertEqual(test_message, ('a', 'a'))
+        self.assertEqual(test_message, 'a')
+        self.assertEqual(test_topic, 'a')
         thread.stop()
         mq.publish('b', 'b')
-        self.assertEqual(test_message, ('a', 'a'))
+        self.assertEqual(test_message, 'a')
